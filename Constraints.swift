@@ -1,13 +1,15 @@
 //
-//  Constraints.swift
+//  MasterConstraints.swift
+//  ViewCodeWithPreview
 //
-//  Created by Lucas Barros on 21/10/22.
-//  Source: https://github.com/adrianopaladini/ChainedConstraints/blob/main/Sources/ChainedConstraints/ChainedConstraints.swift
+//  Created by Lucas C Barros on 2022-10-24.
+//  Copyright © 2022 Lucas C Barros. All rights reserved.
+//  Reference: https://github.com/adrianopaladini/ChainedConstraints/blob/main/Sources/ChainedConstraints/ChainedConstraints.swift
+
 
 import UIKit
 
-    // MARK: - isActive
-
+// MARK: - isActive
 public extension NSLayoutConstraint {
 
     func off() {
@@ -19,12 +21,55 @@ public extension NSLayoutConstraint {
     func toggle() {
         isActive = !isActive
     }
-	func remove() {
-		firstItem?.removeConstraint(self)
-	}
+    func remove() {
+        firstItem?.removeConstraint(self)
+    }
 }
 
-    // MARK: - addSubviews
+// MARK: - addSubviews
+public extension UIViewController {
+    func addSubViews(_ views: [UIView]) {
+        for subView in views {
+            subView.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(subView)
+        }
+    }
+}
+
+// Convenient default value for Views
+public class CodableView: UIView {
+    static var View: UIView = {
+        UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    static var Button: UIButton = {
+        UIButton(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    static var Image: UIImageView = {
+        UIImageView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    static var Stack: UIStackView = {
+        UIStackView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    static var Table: UITableView = {
+        UITableView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    static var Collection: UICollectionView = {
+        UICollectionView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }()
+    
+    public init() {
+        super.init(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
 public extension UIView {
 
@@ -81,9 +126,25 @@ public extension UIView {
         constraint.isActive = isActive
         return self
     }
+    
+    @discardableResult
+    func leftToRight(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
+        let constraint = NSLayoutConstraint(item: self, attribute: .leading, relatedBy: relation, toItem: element, attribute: .trailing, multiplier: multiplier, constant: margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
 
     @discardableResult
     func trailingToLeading(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
+        let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: element, attribute: .leading, multiplier: multiplier, constant: -margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
+    
+    @discardableResult
+    func rightToLeft(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
         let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: element, attribute: .leading, multiplier: multiplier, constant: -margin)
         constraint.priority = priority
         constraint.isActive = isActive
@@ -113,9 +174,25 @@ public extension UIView {
         constraint.isActive = isActive
         return self
     }
+    
+    @discardableResult
+    func leftToLeft(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
+        let constraint = NSLayoutConstraint(item: self, attribute: .leading, relatedBy: relation, toItem: element, attribute: .leading, multiplier: multiplier, constant: margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
 
     @discardableResult
     func trailingToTrailing(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
+        let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: element, attribute: .trailing, multiplier: multiplier, constant: -margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
+    
+    @discardableResult
+    func rightToRight(of element: UIView, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, margin: CGFloat = 0.0, isActive: Bool = true) -> Self {
         let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: element, attribute: .trailing, multiplier: multiplier, constant: -margin)
         constraint.priority = priority
         constraint.isActive = isActive
@@ -191,17 +268,17 @@ public extension UIView {
     // MARK: - Aspect Ratio
 
     @discardableResult
-	func aspectRatio(forHeight: Bool = false, multiplier: CGFloat = 1, relation: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .required, isActive: Bool = true) -> Self {
-		var constraint: NSLayoutConstraint?
-		if forHeight {
-			constraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: relation, toItem: self, attribute: .width, multiplier: multiplier, constant: 0)
-		} else {
-			constraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: relation, toItem: self, attribute: .height, multiplier: multiplier, constant: 0)
-		}
-		constraint?.priority = priority
-		constraint?.isActive = isActive
-		return self
-	}
+    func aspectRatio(forHeight: Bool = false, multiplier: CGFloat = 1, relation: NSLayoutConstraint.Relation = .equal, priority: UILayoutPriority = .required, isActive: Bool = true) -> Self {
+        var constraint: NSLayoutConstraint?
+        if forHeight {
+            constraint = NSLayoutConstraint(item: self, attribute: .height, relatedBy: relation, toItem: self, attribute: .width, multiplier: multiplier, constant: 0)
+        } else {
+            constraint = NSLayoutConstraint(item: self, attribute: .width, relatedBy: relation, toItem: self, attribute: .height, multiplier: multiplier, constant: 0)
+        }
+        constraint?.priority = priority
+        constraint?.isActive = isActive
+        return self
+    }
 }
 
     // MARK: - Individual Constraints
@@ -216,9 +293,9 @@ public extension UIView {
         constraints.first { $0.firstAttribute == NSLayoutConstraint.Attribute.height }
     }
 
-	func aspectRatioConstraint() -> NSLayoutConstraint? {
-		constraints.first { $0.firstAttribute == NSLayoutConstraint.Attribute.height && $0.secondAttribute == NSLayoutConstraint.Attribute.width || $0.firstAttribute == NSLayoutConstraint.Attribute.width && $0.secondAttribute == NSLayoutConstraint.Attribute.height }
-	}
+    func aspectRatioConstraint() -> NSLayoutConstraint? {
+        constraints.first { $0.firstAttribute == NSLayoutConstraint.Attribute.height && $0.secondAttribute == NSLayoutConstraint.Attribute.width || $0.firstAttribute == NSLayoutConstraint.Attribute.width && $0.secondAttribute == NSLayoutConstraint.Attribute.height }
+    }
 
     func topConstraint() -> NSLayoutConstraint? {
         if let constraints = superview?.constraints {
@@ -246,8 +323,26 @@ public extension UIView {
         }
         return nil
     }
+    
+    func leftConstraint() -> NSLayoutConstraint? {
+        if let constraints = superview?.constraints {
+            for constraint in constraints where itemMatch(constraint: constraint, layoutAttribute: NSLayoutConstraint.Attribute.leading) {
+                return constraint
+            }
+        }
+        return nil
+    }
 
     func trailingConstraint() -> NSLayoutConstraint? {
+        if let constraints = superview?.constraints {
+            for constraint in constraints where itemMatch(constraint: constraint, layoutAttribute: NSLayoutConstraint.Attribute.trailing) {
+                return constraint
+            }
+        }
+        return nil
+    }
+    
+    func rightConstraint() -> NSLayoutConstraint? {
         if let constraints = superview?.constraints {
             for constraint in constraints where itemMatch(constraint: constraint, layoutAttribute: NSLayoutConstraint.Attribute.trailing) {
                 return constraint
@@ -347,9 +442,29 @@ public extension UIView {
         constraint.isActive = isActive
         return self
     }
+    
+    @discardableResult
+    func leftToSuperview(_ margin: CGFloat = 0.0, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, toSafeArea: Bool = false, isActive: Bool = true) -> Self {
+        guard let superview = self.superview else { return self }
+        let anchor = toSafeArea ? superview.safeAreaLayoutGuide : superview
+        let constraint = NSLayoutConstraint(item: self, attribute: .leading, relatedBy: relation, toItem: anchor, attribute: .leading, multiplier: multiplier, constant: margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
 
     @discardableResult
     func trailingToSuperview(_ margin: CGFloat = 0.0, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, toSafeArea: Bool = false, isActive: Bool = true) -> Self {
+        guard let superview = self.superview else { return self }
+        let anchor = toSafeArea ? superview.safeAreaLayoutGuide : superview
+        let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: anchor, attribute: .trailing, multiplier: multiplier, constant: -margin)
+        constraint.priority = priority
+        constraint.isActive = isActive
+        return self
+    }
+    
+    @discardableResult
+    func rightToSuperview(_ margin: CGFloat = 0.0, relation: NSLayoutConstraint.Relation = .equal, multiplier: CGFloat = 1, priority: UILayoutPriority = .required, toSafeArea: Bool = false, isActive: Bool = true) -> Self {
         guard let superview = self.superview else { return self }
         let anchor = toSafeArea ? superview.safeAreaLayoutGuide : superview
         let constraint = NSLayoutConstraint(item: self, attribute: .trailing, relatedBy: relation, toItem: anchor, attribute: .trailing, multiplier: multiplier, constant: -margin)
@@ -417,6 +532,8 @@ public extension UIView {
         public static let trailing = LayoutEdge(rawValue: 1 << 2)
         public static let leading = LayoutEdge(rawValue: 1 << 3)
         public static let none = LayoutEdge(rawValue: 1 << 4)
+        public static let left = LayoutEdge(rawValue: 1 << 5)
+        public static let right = LayoutEdge(rawValue: 1 << 6)
     }
 
     @discardableResult
@@ -432,6 +549,12 @@ public extension UIView {
         }
         if !excluding.contains(.bottom) {
             bottomToSuperview(margin, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
+        }
+        if !excluding.contains(.left) {
+            leftToSuperview(margin, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
+        }
+        if !excluding.contains(.right) {
+            rightToSuperview(margin, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
         }
         return self
     }
@@ -449,6 +572,12 @@ public extension UIView {
         }
         if !excluding.contains(.bottom) {
             bottomToSuperview(margin.bottom, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
+        }
+        if !excluding.contains(.left) {
+            leftToSuperview(margin.left, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
+        }
+        if !excluding.contains(.right) {
+            rightToSuperview(margin.right, relation: relation, multiplier: multiplier, priority: priority, toSafeArea: toSafeArea, isActive: isActive)
         }
         return self
     }
